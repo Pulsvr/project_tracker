@@ -6,6 +6,7 @@ class Search(models.Model):
     min_price = models.DecimalField(max_digits=10, decimal_places=2)
     price_history = models.DecimalField(max_digits=10, decimal_places=2)
     quantity = models.IntegerField()
+    image = models.ImageField(upload_to='images')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

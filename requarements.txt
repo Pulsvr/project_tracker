@@ -3,4 +3,3 @@ python-dotenv
 django-icons
 Pillow
 requests
-requests
