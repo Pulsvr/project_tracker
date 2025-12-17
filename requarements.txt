@@ -2,3 +2,4 @@ Django
 python-dotenv
 django-icons
 Pillow
+requests
