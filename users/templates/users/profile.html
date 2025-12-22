@@ -1,0 +1,139 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- Левая панель пользователя -->
+    <div class="bg-white rounded-md shadow-sm px-4 py-5 md:col-span-3 lg:col-span-2">
+        <div class="flex flex-col items-center gap-3">
+            <img class="w-32 h-32 object-cover rounded-full" src="{{ user.get_avatar }}" alt="{{ user.username }}">
+            <div class="text-center">
+                <p class="font-semibold text-gray-700 text-lg">{{ user.username }}</p>
+                <p class="text-gray-400 text-sm break-all">{{ user.email }}</p>
+            </div>
+            <a href="#" class="bg-indigo-500 text-white w-full text-center p-2 rounded-md hover:bg-indigo-600 transition">
+                Редактировать
+            </a>
+        </div>
+    </div>
+
+    <!-- Центр — данные пользователя -->
+    <div class="bg-white rounded-md shadow-sm md:col-span-6 lg:col-span-7 p-4">
+        <div class="flex flex-col gap-4 pb-3">
+            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                <p class="text-gray-600 text-sm">Имя пользователя</p>
+                <p class="font-medium text-sm break-all">{{ user.username }}</p>
+            </div>
+
+            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                <p class="text-gray-600 text-sm">Имя</p>
+                <p class="font-medium text-sm">
+                    {% if user.first_name %}{{ user.first_name }}{% else %}Не задано{% endif %}
+                </p>
+            </div>
+
+            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                <p class="text-gray-600 text-sm">Фамилия</p>
+                <p class="font-medium text-sm">
+                    {% if user.last_name %}{{ user.last_name }}{% else %}Не задано{% endif %}
+                </p>
+            </div>
+
+            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
+                <p class="text-gray-600 text-sm">Дата регистрации</p>
+                <p class="font-medium text-sm">{{ user.date_joined|date:"Y-m-d" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая панель — смена пароля -->
+    <div class="flex flex-col gap-4 md:col-span-3 bg-white shadow-sm p-4 rounded-md">
+        <h4 class="font-bold text-lg mb-2">Сменить пароль</h4>
+        <form method="POST" class="flex flex-col gap-4" action="">
+            {% csrf_token %}
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-gray-500" for="old_password">Старый пароль</label>
+                <input
+                    name="old_password"
+                    id="old_password"
+                    type="password"
+                    placeholder="Введите старый пароль"
+                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-200"
+                >
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-gray-500" for="new_password">Новый пароль</label>
+                <input
+                    name="new_password"
+                    id="new_password"
+                    type="password"
+                    placeholder="Введите новый пароль"
+                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-200"
+                >
+            </div>
+
+            <div class="flex flex-col gap-1">
+                <label class="text-sm text-gray-500" for="new_password_confirm">Подтвердите новый пароль</label>
+                <input
+                    name="new_password_confirm"
+                    id="new_password_confirm"
+                    type="password"
+                    placeholder="Введите новый пароль"
+                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-200"
+                >
+            </div>
+
+            <button type="submit" class="text-sm rounded-md bg-gray-100 text-gray-700 p-2 hover:bg-gray-200 transition">
+                Сменить
+            </button>
+        </form>
+
+        {% if error %}
+            <p class="bg-rose-100 text-rose-800 p-2 rounded-md text-center text-sm">{{ error }}</p>
+        {% endif %}
+
+        {% if success %}
+            <p class="bg-green-100 text-green-800 p-2 rounded-md text-center text-sm">{{ success }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Блок проектов -->
+<div class="bg-white rounded-md shadow-sm mt-5 p-4">
+    <h3 class="text-lg font-semibold mb-3">Проекты</h3>
+    {% if projects %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for project in projects %}
+                <div class="border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition">
+                    <p class="font-medium text-indigo-600 mb-1">{{ project.title }}</p>
+                    <p class="text-gray-500 text-sm mb-2">{{ project.description|truncatechars:120 }}</p>
+                    <p class="text-xs text-gray-400">Статус: {{ project.status }}</p>
+                    <p class="text-xs text-gray-400">Создан: {{ project.created_at|date:"Y-m-d" }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500">Нет проектов</p>
+    {% endif %}
+</div>
+
+<!-- Блок задач -->
+<div class="bg-white rounded-md shadow-sm mt-5 p-4 mb-10">
+    <h3 class="text-lg font-semibold mb-3">Задачи</h3>
+    {% if tasks %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for task in tasks %}
+                <div class="border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition">
+                    <p class="font-medium text-indigo-600 mb-1">{{ task.title }}</p>
+                    <p class="text-gray-500 text-sm mb-2">{{ task.description|truncatechars:150 }}</p>
+                    <p class="text-xs text-gray-400">Статус: {{ task.status }}</p>
+                    <p class="text-xs text-gray-400">Срок: {% if task.deadline %}{{ task.deadline|date:"Y-m-d" }}{% else %}Не задан{% endif %}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500">Нет задач</p>
+    {% endif %}
+</div>
+{% endblock %}
