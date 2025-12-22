@@ -1,9 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import ForeignKey
-
-from searches.models import Search
-
 
 class CustomUser(AbstractUser):
     avatar = models.ImageField(null=True, blank=True, upload_to='avatars/')

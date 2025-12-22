@@ -1,6 +1,6 @@
 from django.db import models
 
-from users.models import CustomUser
+from django.conf import settings
 
 
 class Search(models.Model):
@@ -12,7 +12,7 @@ class Search(models.Model):
     image = models.ImageField(upload_to='images')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
