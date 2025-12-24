@@ -1,0 +1,8 @@
+SECRET_KEY='django-insecure-_$h!9+9=t()@8q6()w5)3b#ayfjpfe@at=fbfm@v%2&i@mqr%8'
+
+EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST="smtp.yandex.ru"
+EMAIL_PORT=465
+EMAIL_USE_SSL=True
+EMAIL_HOST_USER="EMAIL"
+EMAIL_HOST_PASSWORD="PASSWORD"
