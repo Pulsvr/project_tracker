@@ -29,7 +29,7 @@ def register(request):
                 send_mail(
                     subject="Подтверждение регистрации",
                     message=f"Перейдите по ссылке для подтверждения: {confirm_url}",
-                    from_email="z1tra@yandex.ru",
+                    from_email="pulsvr@vk.com",
                     recipient_list=[email],
                     fail_silently=False,
                 )
