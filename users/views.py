@@ -13,31 +13,38 @@ def register(request):
         password = request.POST['password']
 
         if username and email and password:
-            if not CustomUser.objects.filter(username=username, email=email).exists():
-                user = CustomUser.objects.create_user(
-                    username=username,
-                    email=email,
-                    password=password,
-                    is_active=False,
-                )
-
-                token = email_confirmation_token.make_token(user)
-                domain = get_current_site(request).domain
-
-                confirm_url = f"http://{domain}/users/confirm_email/{user.pk}/{token}"
-
-                send_mail(
-                    subject="Подтверждение регистрации",
-                    message=f"Перейдите по ссылке для подтверждения: {confirm_url}",
-                    from_email="z1tra@yandex.com",
-                    recipient_list=['z1tra@yandex.ru'],
-                    fail_silently=False,
-                )
-
-                return redirect('check_email')
-
+            # Проверяем username и email отдельно для более точных сообщений об ошибках
+            if CustomUser.objects.filter(username=username).exists():
+                error = "Пользователь с таким именем уже существует"
+            elif CustomUser.objects.filter(email=email).exists():
+                error = "Пользователь с таким email уже существует"
             else:
-                error = "Пользователь с таким именем или почтой уже существует"
+                # Если оба поля уникальны, создаем пользователя
+                try:
+                    user = CustomUser.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        is_active=False,
+                    )
+
+                    token = email_confirmation_token.make_token(user)
+                    domain = get_current_site(request).domain
+
+                    confirm_url = f"http://{domain}/users/confirm_email/{user.pk}/{token}"
+
+                    send_mail(
+                        subject="Подтверждение регистрации",
+                        message=f"Перейдите по ссылке для подтверждения: {confirm_url}",
+                        from_email="smolyak.off@yandex.ru",
+                        recipient_list=['smolyak.off@yandex.ru'],
+                        fail_silently=False,
+                    )
+
+                    return redirect('check_email')
+                except Exception as e:
+                    # Обработка неожиданных ошибок при создании пользователя
+                    error = f"Ошибка при регистрации: {str(e)}"
         else:
             error = "Заполните все поля"
 
@@ -55,7 +62,7 @@ def login(request):
 
             if user:
                 user_login(request, user)
-                return redirect('projects_kanban')
+                return redirect('search')
             else:
                 error = "Неверный логин или пароль"
         else:
