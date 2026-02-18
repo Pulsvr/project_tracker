@@ -24,6 +24,7 @@
             {% if error %}
                 <p class="text-red-500 text-sm text-center">{{ error }}</p>
             {% endif %}
+            {% block after_form %}{% endblock %}
         </form>
     </body>
 </html>

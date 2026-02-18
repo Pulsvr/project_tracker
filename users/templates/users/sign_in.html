@@ -10,3 +10,9 @@
 {% block form_title %} Вход {% endblock %}
 
 {% block button %} Войти {% endblock %}
+
+{% block after_form %}
+    <p class="text-center mt-4 text-sm text-gray-600">
+        Нет аккаунта? <a href="{% url 'register' %}" class="text-indigo-600 hover:text-indigo-800 font-medium underline">Зарегистрироваться</a>
+    </p>
+{% endblock %}

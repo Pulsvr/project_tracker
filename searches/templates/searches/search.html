@@ -36,7 +36,9 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-500">Минимальная цена:</span>
-                        <span class="text-sm font-semibold text-green-600">{{ search.min_price }} ₽</span>
+                        <span class="text-sm font-semibold {% if search.min_price <= search.price %}text-green-600{% else %}text-red-600{% endif %}">
+                            {{ search.min_price }} ₽
+                        </span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-500">Найдено товаров:</span>

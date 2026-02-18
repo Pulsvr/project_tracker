@@ -26,16 +26,16 @@
             </div>
             
             <div class="p-6">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ search.name }}</h2>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ products.0.name|default:search.name }}</h2>
                 
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <p class="text-sm text-gray-500 mb-1">Желаемая цена</p>
                         <p class="text-xl font-bold text-gray-900">{{ search.price }} ₽</p>
                     </div>
-                    <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="{% if search.min_price <= search.price %}bg-green-50{% else %}bg-red-50{% endif %} p-4 rounded-lg">
                         <p class="text-sm text-gray-500 mb-1">Минимальная цена</p>
-                        <p class="text-xl font-bold text-green-600">{{ search.min_price }} ₽</p>
+                        <p class="text-xl font-bold {% if search.min_price <= search.price %}text-green-600{% else %}text-red-600{% endif %}">{{ search.min_price }} ₽</p>
                     </div>
                 </div>
 
@@ -49,6 +49,15 @@
                         <p class="text-lg font-semibold text-gray-900">{{ search.created_at|date:"d.m.Y" }}</p>
                     </div>
                 </div>
+                
+                {% if search.product_url %}
+                <div class="pt-4 border-t border-gray-200">
+                    <p class="text-sm text-gray-500 mb-2">Ссылка на товар</p>
+                    <p class="text-sm text-indigo-600 cursor-pointer hover:text-indigo-700 break-all">
+                        {{ search.product_url }}
+                    </p>
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -59,11 +68,32 @@
             <div class="space-y-4">
                 {% for product in products %}
                 <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1">
-                            <h4 class="font-semibold text-gray-900 mb-1">{{ product.name|default:"Товар" }}</h4>
-                            <p class="text-sm text-gray-500">ID: {{ product.id|default:"—" }}</p>
+                    <div class="flex items-center space-x-4">
+                        <!-- Изображение товара -->
+                        <div class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+                            {% if product.image %}
+                                <img src="{{ product.image }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                            {% endif %}
                         </div>
+                        
+                        <!-- Информация о товаре -->
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-900 mb-1">{{ product.name }}</h4>
+                            {% if product.product_url %}
+                                <p class="text-sm mt-1">
+                                    <span class="text-gray-700">Ссылка:</span>
+                                    <span class="text-indigo-600 hover:text-indigo-700 cursor-pointer">{{ product.product_url }}</span>
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Цена -->
                         <div class="text-right">
                             <p class="text-xl font-bold text-indigo-600">{{ product.price|default:0 }} ₽</p>
                         </div>
@@ -83,17 +113,23 @@
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-500">Разница с желаемой ценой</span>
-                    <span class="text-sm font-semibold {% if search.min_price <= search.price %}text-green-600{% else %}text-red-600{% endif %}">
-                        {% if search.min_price <= search.price %}
-                            Экономия: {{ search.price|floatformat:0|add:"-"|add:search.min_price|floatformat:0 }} ₽
+                    <span class="text-sm font-semibold {% if price_difference >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if price_difference >= 0 %}
+                            Экономия: {{ price_difference_abs|floatformat:0 }} ₽
                         {% else %}
-                            Дороже на: {{ search.min_price|floatformat:0|add:"-"|add:search.price|floatformat:0 }} ₽
+                            Дороже на: {{ price_difference_abs|floatformat:0 }} ₽
                         {% endif %}
                     </span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-500">История цен</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ search.price_history }} ₽</span>
+                    <span class="text-sm font-semibold {% if price_change_percent < 0 %}text-green-600{% elif price_change_percent > 0 %}text-red-600{% else %}text-gray-900{% endif %}">
+                        {% if price_change_percent > 0 %}
+                            +{{ price_change_percent|floatformat:1 }}%
+                        {% else %}
+                            {{ price_change_percent|floatformat:1 }}%
+                        {% endif %}
+                    </span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-500">Обновлено</span>
@@ -106,12 +142,18 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Действия</h3>
             <div class="space-y-2">
-                <button class="w-full bg-indigo-500 text-white px-4 py-2 rounded-md font-medium hover:bg-indigo-600 transition">
-                    Обновить поиск
-                </button>
-                <button class="w-full bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition">
-                    Удалить поиск
-                </button>
+                <form method="post" action="{% url 'update_search' search.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-indigo-500 text-white px-4 py-2 rounded-md font-medium hover:bg-indigo-600 transition">
+                        Обновить поиск
+                    </button>
+                </form>
+                <form method="post" action="{% url 'delete_search' search.id %}" onsubmit="return confirm('Вы уверены, что хотите удалить этот поиск?');">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition">
+                        Удалить поиск
+                    </button>
+                </form>
             </div>
         </div>
     </div>

@@ -137,3 +137,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# External API settings
+SEARCH_API_URL = 'http://localhost:3000/products'
+

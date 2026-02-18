@@ -5,7 +5,6 @@
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
-    <!-- Левая панель пользователя -->
     <div class="bg-white rounded-md shadow-sm px-4 py-5 md:col-span-3 lg:col-span-2">
         <div class="flex flex-col items-center gap-3">
             <img class="w-32 h-32 object-cover rounded-full" src="{{ user.get_avatar }}" alt="{{ user.username }}">
@@ -13,91 +12,148 @@
                 <p class="font-semibold text-gray-700 text-lg">{{ user.username }}</p>
                 <p class="text-gray-400 text-sm break-all">{{ user.email }}</p>
             </div>
-            <a href="#" class="bg-indigo-500 text-white w-full text-center p-2 rounded-md hover:bg-indigo-600 transition">
-                Редактировать
-            </a>
+            <div class="w-full">
+                <button id="editBtn" type="button" onclick="toggleEdit()" class="bg-indigo-500 text-white w-full text-center p-2 rounded-md hover:bg-indigo-600 transition">
+                    Редактировать
+                </button>
+
+                <div id="saveCancelButtons" class="hidden flex flex-col gap-2">
+                    <button type="submit" form="profileForm" class="bg-green-600 text-white w-full p-2 rounded-md hover:bg-green-700 transition">
+                        Сохранить
+                    </button>
+                    <button type="button" onclick="cancelEdit()" class="bg-gray-500 text-white w-full p-2 rounded-md hover:bg-gray-600 transition">
+                        Отмена
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Центр — данные пользователя -->
     <div class="bg-white rounded-md shadow-sm md:col-span-6 lg:col-span-7 p-4">
-        <div class="flex flex-col gap-4 pb-3">
-            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                <p class="text-gray-600 text-sm">Имя пользователя</p>
-                <p class="font-medium text-sm break-all">{{ user.username }}</p>
-            </div>
+        <form method="POST" id="profileForm">
+            {% csrf_token %}
 
-            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                <p class="text-gray-600 text-sm">Имя</p>
-                <p class="font-medium text-sm">
-                    {% if user.first_name %}{{ user.first_name }}{% else %}Не задано{% endif %}
-                </p>
-            </div>
+            <div class="flex flex-col gap-2 pb-3">
+                <div class="flex justify-between items-center border-b border-gray-100 h-12">
+                    <p class="text-gray-600 text-sm">Имя пользователя</p>
+                    <p class="font-medium text-sm break-all text-gray-800">{{ user.username }}</p>
+                </div>
 
-            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                <p class="text-gray-600 text-sm">Фамилия</p>
-                <p class="font-medium text-sm">
-                    {% if user.last_name %}{{ user.last_name }}{% else %}Не задано{% endif %}
-                </p>
-            </div>
+                <div class="flex justify-between items-center border-b border-gray-100 h-12">
+                    <p class="text-gray-600 text-sm">Имя</p>
 
-            <div class="flex justify-between items-center border-b border-gray-200 pb-2">
-                <p class="text-gray-600 text-sm">Дата регистрации</p>
-                <p class="font-medium text-sm">{{ user.date_joined|date:"Y-m-d" }}</p>
+                    <div class="flex items-center justify-end flex-1 ml-4">
+                        <p id="firstNameView" class="font-medium text-sm text-gray-700 py-1">
+                            {% if user.first_name %}{{ user.first_name }}{% else %}<span class="text-gray-400">Не задано</span>{% endif %}
+                        </p>
+
+                        <input type="text" name="first_name" id="firstNameInput"
+                               value="{{ user.first_name }}"
+                               class="hidden text-sm border border-indigo-500 bg-white px-3 py-1 rounded focus:ring-1 focus:ring-indigo-400 focus:outline-none w-full max-w-[200px]">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-b border-gray-100 h-12">
+                    <p class="text-gray-600 text-sm">Фамилия</p>
+
+                    <div class="flex items-center justify-end flex-1 ml-4">
+                        <p id="lastNameView" class="font-medium text-sm text-gray-700 py-1">
+                            {% if user.last_name %}{{ user.last_name }}{% else %}<span class="text-gray-400">Не задано</span>{% endif %}
+                        </p>
+
+                        <input type="text" name="last_name" id="lastNameInput"
+                               value="{{ user.last_name }}"
+                               class="hidden text-sm border border-indigo-500 bg-white px-3 py-1 rounded focus:ring-1 focus:ring-indigo-400 focus:outline-none w-full max-w-[200px]">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center border-b border-gray-100 h-12">
+                    <p class="text-gray-600 text-sm">Дата регистрации</p>
+                    <p class="font-medium text-sm text-gray-800">{{ user.date_joined|date:"Y-m-d" }}</p>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 
-    <!-- Правая панель — смена пароля -->
     <div class="flex flex-col gap-4 md:col-span-3 bg-white shadow-sm p-4 rounded-md">
-        <h4 class="font-bold text-lg mb-2">Сменить пароль</h4>
-        <form method="POST" class="flex flex-col gap-4" action="">
+        <h4 class="font-bold text-lg mb-2 text-gray-700">Сменить пароль</h4>
+        <form method="POST" class="flex flex-col gap-4">
             {% csrf_token %}
             <div class="flex flex-col gap-1">
-                <label class="text-sm text-gray-500" for="old_password">Старый пароль</label>
-                <input
-                    name="old_password"
-                    id="old_password"
-                    type="password"
-                    placeholder="Введите старый пароль"
-                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-200"
-                >
+                <label class="text-xs text-gray-500" for="old_password">Старый пароль</label>
+                <input name="old_password" id="old_password" type="password" placeholder="********"
+                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-100">
             </div>
 
             <div class="flex flex-col gap-1">
-                <label class="text-sm text-gray-500" for="new_password">Новый пароль</label>
-                <input
-                    name="new_password"
-                    id="new_password"
-                    type="password"
-                    placeholder="Введите новый пароль"
-                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-200"
-                >
+                <label class="text-xs text-gray-500" for="new_password">Новый пароль</label>
+                <input name="new_password" id="new_password" type="password" placeholder="********"
+                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-100">
             </div>
 
             <div class="flex flex-col gap-1">
-                <label class="text-sm text-gray-500" for="new_password_confirm">Подтвердите новый пароль</label>
-                <input
-                    name="new_password_confirm"
-                    id="new_password_confirm"
-                    type="password"
-                    placeholder="Введите новый пароль"
-                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-200"
-                >
+                <label class="text-xs text-gray-500" for="new_password_confirm">Подтверждение</label>
+                <input name="new_password_confirm" id="new_password_confirm" type="password" placeholder="********"
+                    class="border border-gray-300 p-2 rounded-md text-sm w-full outline-none focus:ring focus:ring-indigo-100">
             </div>
 
-            <button type="submit" class="text-sm rounded-md bg-gray-100 text-gray-700 p-2 hover:bg-gray-200 transition">
-                Сменить
+            <button type="submit" class="text-sm rounded-md bg-gray-100 text-gray-700 p-2 hover:bg-gray-200 transition font-medium">
+                Обновить пароль
             </button>
         </form>
 
         {% if error %}
-            <p class="bg-rose-100 text-rose-800 p-2 rounded-md text-center text-sm">{{ error }}</p>
+            <p class="bg-rose-50 text-rose-700 p-2 rounded-md text-center text-xs border border-rose-100">{{ error }}</p>
         {% endif %}
 
         {% if success %}
-            <p class="bg-green-100 text-green-800 p-2 rounded-md text-center text-sm">{{ success }}</p>
+            <p class="bg-green-50 text-green-700 p-2 rounded-md text-center text-xs border border-green-100">{{ success }}</p>
         {% endif %}
     </div>
 </div>
+
+<script>
+let originalFirstName = '';
+let originalLastName = '';
+
+function toggleEdit() {
+    const firstNameView = document.getElementById('firstNameView');
+    const lastNameView = document.getElementById('lastNameView');
+    const firstNameInput = document.getElementById('firstNameInput');
+    const lastNameInput = document.getElementById('lastNameInput');
+    const editBtn = document.getElementById('editBtn');
+    const saveCancelButtons = document.getElementById('saveCancelButtons');
+
+    originalFirstName = firstNameInput.value;
+    originalLastName = lastNameInput.value;
+
+    firstNameView.classList.add('hidden');
+    lastNameView.classList.add('hidden');
+    firstNameInput.classList.remove('hidden');
+    lastNameInput.classList.remove('hidden');
+
+    editBtn.classList.add('hidden');
+    saveCancelButtons.classList.remove('hidden');
+}
+
+function cancelEdit() {
+    const firstNameView = document.getElementById('firstNameView');
+    const lastNameView = document.getElementById('lastNameView');
+    const firstNameInput = document.getElementById('firstNameInput');
+    const lastNameInput = document.getElementById('lastNameInput');
+    const editBtn = document.getElementById('editBtn');
+    const saveCancelButtons = document.getElementById('saveCancelButtons');
+
+    firstNameInput.value = originalFirstName;
+    lastNameInput.value = originalLastName;
+
+    firstNameView.classList.remove('hidden');
+    lastNameView.classList.remove('hidden');
+    firstNameInput.classList.add('hidden');
+    lastNameInput.classList.add('hidden');
+
+    editBtn.classList.remove('hidden');
+    saveCancelButtons.classList.add('hidden');
+}
+</script>
 {% endblock %}
