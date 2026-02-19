@@ -51,7 +51,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Если файла requirements.txt нет, установите зависимости вручную:
+Если файла requirements.txt нет, установите зависимости вручную: 
 
 ```bash
 pip install django django-crispy-forms django-crispy-bootstrap4 requests python-decouple
