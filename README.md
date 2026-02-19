@@ -15,7 +15,7 @@
 
 - Backend: Django 4.x
 - Frontend: HTML5, Tailwind CSS, JavaScript
-- Database: SQLite (по умолчанию)
+- Database: PostgreSQL
 - API: Внешний JSON API для получения данных о товарах
 
 ## УСТАНОВКА И ЗАПУСК
