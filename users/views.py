@@ -1,19 +1,34 @@
 from django.contrib.auth import authenticate, login as user_login, logout as user_logout, update_session_auth_hash
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 
 from users.models import CustomUser
 from users.utils import email_confirmation_token
 
+def home(request):
+    # Главная страница - редирект на поиски или вход
+    if request.user.is_authenticated:
+        return redirect('search')
+    return redirect('login')
+
 def register(request):
-    """Регистрация нового пользователя с отправкой письма подтверждения"""
+    # Регистрация нового пользователя с отправкой письма подтверждения
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
         password = request.POST['password']
 
         if username and email and password:
+            # Проверяем валидность email
+            try:
+                validate_email(email)
+            except ValidationError:
+                error = "Введите корректный email адрес"
+                return render(request, "users/sign_up.html", {"error": error})
+            
             # Проверяем только username, email может быть неуникальным
             if CustomUser.objects.filter(username=username).exists():
                 error = "Пользователь с таким именем уже существует"
@@ -30,7 +45,7 @@ def register(request):
                     token = email_confirmation_token.make_token(user)
                     domain = get_current_site(request).domain
 
-                    confirm_url = f"http://{domain}/users/confirm_email/{user.pk}/{token}"
+                    confirm_url = f"http://{domain}/confirm_email/{user.pk}/{token}"
 
                     send_mail(
                         subject="Подтверждение регистрации",
@@ -52,7 +67,7 @@ def register(request):
     return render(request, "users/sign_up.html")
 
 def login(request):
-    """Вход пользователя в систему"""
+    # Вход пользователя в систему
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -73,16 +88,16 @@ def login(request):
     return render(request, 'users/sign_in.html')
 
 def logout(request):
-    """Выход пользователя из системы"""
+    # Выход пользователя из системы
     user_logout(request)
     return redirect('login')
 
 def check_email(request):
-    """Страница ожидания подтверждения email"""
+    # Страница ожидания подтверждения email
     return render(request, "users/check_email.html")
 
 def confirm_email(request, user_id, token):
-    """Подтверждение email пользователя по токену"""
+    # Подтверждение email пользователя по токену
     user = get_object_or_404(CustomUser, pk=user_id)
 
     if email_confirmation_token.check_token(user, token):
@@ -94,7 +109,7 @@ def confirm_email(request, user_id, token):
     return render(request, "users/confirm_failed.html")
 
 def profile(request):
-    """Страница профиля пользователя со сменой пароля и редактированием данных"""
+    # Страница профиля пользователя со сменой пароля и редактированием данных
     user = request.user
 
     if request.method == 'POST':

@@ -148,12 +148,9 @@
                         Обновить поиск
                     </button>
                 </form>
-                <form method="post" action="{% url 'delete_search' search.id %}" onsubmit="return confirm('Вы уверены, что хотите удалить этот поиск?');">
-                    {% csrf_token %}
-                    <button type="submit" class="w-full bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition">
-                        Удалить поиск
-                    </button>
-                </form>
+                <a href="{% url 'delete_search' search.id %}" class="w-full bg-red-500 text-white px-4 py-2 rounded-md font-medium hover:bg-red-600 transition text-center block">
+                    Удалить поиск
+                </a>
             </div>
         </div>
     </div>

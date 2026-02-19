@@ -7,7 +7,7 @@ from django.conf import settings
 URL = settings.SEARCH_API_URL
 
 def get_data(url):
-    """Получает данные из JSON-server API с проверкой структуры ответа"""
+    # Получает данные из JSON-server API с проверкой структуры ответа
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
@@ -27,7 +27,7 @@ def get_data(url):
         raise Exception(f"Ошибка при парсинге JSON: {str(e)}")
 
 def search_products(query, all_products):
-    """Ищет товары по запросу без учета регистра с релевантностью"""
+    # Ищет товары по запросу без учета регистра с релевантностью
     if not query or not all_products:
         return []
     
@@ -61,7 +61,7 @@ def search_products(query, all_products):
 
 @login_required
 def search(request):
-    """Отображает список поисков текущего пользователя"""
+    # Отображает список поисков текущего пользователя
     # Показываем только поиски текущего пользователя
     searches = Search.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'searches/search.html', {
@@ -70,7 +70,7 @@ def search(request):
 
 @login_required
 def create_search(request):
-    """Создает новый поиск товаров по API"""
+    # Создает новый поиск товаров по API
     if request.method == 'POST':
         name = request.POST['name']
         price = request.POST['price']
@@ -158,7 +158,7 @@ def create_search(request):
     return render(request, 'searches/create_search.html')
 
 def sort_products_by_price(products):
-    """Сортирует товары по возрастанию цены"""
+    # Сортирует товары по возрастанию цены
     def get_price(product):
         price = product.get('price')
         if price is None:
@@ -172,7 +172,7 @@ def sort_products_by_price(products):
 
 @login_required
 def detail_search(request, id):
-    """Отображает детали поиска с актуальными товарами из API"""
+    # Отображает детали поиска с актуальными товарами из API
     # Получаем поиск только если он принадлежит текущему пользователю
     search_obj = get_object_or_404(Search, id=id, user=request.user)
     
@@ -219,7 +219,7 @@ def detail_search(request, id):
 
 @login_required
 def update_search(request, id):
-    """Обновляет данные поиска: минимальную цену и количество товаров"""
+    # Обновляет данные поиска: минимальную цену и количество товаров
     search_obj = get_object_or_404(Search, id=id, user=request.user)
     
     try:
@@ -263,7 +263,7 @@ def update_search(request, id):
 
 @login_required
 def delete_search(request, id):
-    """Удаляет поиск после подтверждения"""
+    # Удаляет поиск после подтверждения
     if request.method == 'POST':
         search_obj = get_object_or_404(Search, id=id, user=request.user)
         search_obj.delete()
